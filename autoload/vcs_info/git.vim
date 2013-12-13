@@ -13,13 +13,13 @@ function! s:abspath(path, mods)
   return a:path !=# '' ? fnamemodify(a:path, a:mods) : ''
 endfunction
 
-function! s:vcs_git.root(base) dict
+function! s:vcs_git.root(base) 
   let dir = s:abspath(finddir('.git', a:base . ';'), ':p:h:h')
   let file = s:abspath(findfile('.git', a:base . ';'), ':p:h')
   return len(dir) >= len(file) ? dir : file
 endfunction
 
-function! s:vcs_git.branch(path) dict
+function! s:vcs_git.branch(path) 
   let dotgit = a:path . '/.git'
   if filereadable(dotgit)
     let line = readfile(dotgit)[0]
@@ -41,7 +41,7 @@ function! s:vcs_git.branch(path) dict
   return ''
 endfunction
 
-function! s:vcs_git.status(path) dict
+function! s:vcs_git.status(path) 
   execute 'lcd' a:path
   let output = vcs_info#execute([
         \   ['git', 'status', '--short'],

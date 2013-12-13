@@ -9,13 +9,13 @@ let s:vcs_hg = {
       \   'exists' : executable('hg'),
       \ }
 
-function! s:vcs_hg.root(base) dict
+function! s:vcs_hg.root(base) 
   let root = finddir('.hg', a:base . ';')
   return root !=# '' ? fnamemodify(root, ':p:h:h') : ''
 endfunction
 
 if has('python') && !get(g:, 'vcs_info#hg#disable_if_python', 0)
-  function! s:vcs_hg.branch(path) dict
+  function! s:vcs_hg.branch(path) 
     let branch = ''
     python <<EOT
 if not 'vcs_info_hg_branch' in globals():
@@ -34,7 +34,7 @@ EOT
     return branch
   endfunction
 
-  function! s:vcs_hg.status(path) dict
+  function! s:vcs_hg.status(path) 
     let status = ''
     python <<EOT
 if not 'vcs_info_hg_status' in globals():
@@ -61,13 +61,13 @@ EOT
     return status
   endfunction
 else
-  function! s:vcs_hg.branch(path) dict
+  function! s:vcs_hg.branch(path) 
     return vcs_info#execute([
       \   ['hg', '-R', a:path, 'branch']
       \ ])
   endfunction
 
-  function! s:vcs_hg.status() dict
+  function! s:vcs_hg.status(path) 
     return vcs_info#execute([
       \   ['hg', '-R', a:path, 'status']
       \ ])
