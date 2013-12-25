@@ -21,10 +21,6 @@ endfunction
 
 call s:load_vcs_info(expand('<sfile>:p:r'))
 
-function! s:filepath()
-  return fnamemodify(expand('%'), ':p')
-endfunction
-
 function! vcs_info#find_root()
   let vcs_info_cache = s:get_vcs_info()
   return !empty(vcs_info_cache)
@@ -65,14 +61,13 @@ function! s:detect_vcs(base)
 endfunction
 
 function! s:get_vcs_info()
-  let file = s:filepath()
-  let bufnr = bufnr(file)
+  let bufnr = bufnr('%')
   if bufnr >= 0 && type(getbufvar(bufnr, 'vcs_info_cache')) == type({})
     return getbufvar(bufnr, 'vcs_info_cache')
   endif
 
   let vcs_info_cache = {}
-  let [name, root] = s:detect_vcs(fnamemodify(file, ':h'))
+  let [name, root] = s:detect_vcs(expand('%:p:h'))
   if name !=# ''
     let branch = s:vcs[name].branch(root)
     if branch !=# ''
