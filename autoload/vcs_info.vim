@@ -30,16 +30,22 @@ endfunction
 
 function! vcs_info#get_branch()
   let vcs_info_cache = s:get_vcs_info()
-  return !empty(vcs_info_cache)
-        \ ? [vcs_info_cache.name, vcs_info_cache.branch]
-        \ : ['', '']
+  if empty(vcs_info_cache)
+    return ['', '']
+  endif
+  let name = vcs_info_cache.name
+  let root = vcs_info_cache.root
+  return [name, s:get_vcs_branch(name, root)]
 endfunction
 
 function! vcs_info#get_status()
   let vcs_info_cache = s:get_vcs_info()
-  return !empty(vcs_info_cache)
-        \ ? [vcs_info_cache.name, vcs_info_cache.branch, vcs_info_cache.status]
-        \ : ['', '', '']
+  if empty(vcs_info_cache)
+    return ['', '', '']
+  endif
+  let name = vcs_info_cache.name
+  let root = vcs_info_cache.root
+  return [name, s:get_vcs_branch(name, root), s:get_vcs_status(name, root)]
 endfunction
 
 function! vcs_info#clear_cache()
@@ -61,24 +67,36 @@ function! s:detect_vcs(base)
 endfunction
 
 function! s:get_vcs_info()
-  let bufnr = bufnr('%')
-  if bufnr >= 0 && type(getbufvar(bufnr, 'vcs_info_cache')) == type({})
-    return getbufvar(bufnr, 'vcs_info_cache')
+  if exists('b:vcs_info_cache') && type(b:vcs_info_cache) == type({})
+    return b:vcs_info_cache
   endif
 
   let vcs_info_cache = {}
   let [name, root] = s:detect_vcs(expand('%:p:h'))
   if name !=# ''
-    let branch = s:vcs[name].branch(root)
-    if branch !=# ''
-      let vcs_info_cache.name = name
-      let vcs_info_cache.root = root
-      let vcs_info_cache.branch = substitute(branch, '[\r\n]\+$', '', '')
-      let vcs_info_cache.status = s:vcs[name].status(root) 
-    endif
+    let vcs_info_cache.name = name
+    let vcs_info_cache.root = root
   endif
-  call setbufvar(bufnr, 'vcs_info_cache', vcs_info_cache)
+  let b:vcs_info_cache = vcs_info_cache
   return vcs_info_cache
+endfunction
+
+function! s:get_vcs_branch(name, root)
+  if exists('b:vcs_info_cache.branch')
+    return b:vcs_info_cache.branch
+  endif
+  let branch = s:vcs[a:name].branch(a:root)
+  let b:vcs_info_cache.branch = branch
+  return branch
+endfunction
+
+function! s:get_vcs_status(name, root)
+  if exists('b:vcs_info_cache.status')
+    return b:vcs_info_cache.status
+  endif
+  let status = s:vcs[a:name].status(a:root)
+  let b:vcs_info_cache.status = status
+  return status
 endfunction
 
 function! s:check_vimproc()
