@@ -118,7 +118,7 @@ call s:check_vimproc()
 
 function! vcs_info#execute(cmds)
   for cmd in a:cmds
-    let result = s:execute(cmd)
+    let result = substitute(s:execute(cmd), '[\r\n]\+$', '', '')
     if result !=# ''
       return result
     endif
