@@ -104,12 +104,12 @@ function! s:check_vimproc()
     call vimproc#version()
     function! s:execute(cmd)
       let result = vimproc#system(a:cmd)
-      return vimproc#get_last_errmsg() ==# '' ? result : ''
+      return vimproc#get_last_status() == 0 ? result : ''
     endfunction
   catch
     function! s:execute(cmd)
       let result = system(join(map(copy(a:cmd), 'escape(v:val, " ")'), ' '))
-      return v:shell_error != 0 ? result : ''
+      return v:shell_error == 0 ? result : ''
     endfunction
   endtry
 endfunction
