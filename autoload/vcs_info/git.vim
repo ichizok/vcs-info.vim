@@ -9,17 +9,17 @@ let s:vcs_git = {
       \   'exists' : executable('git'),
       \ }
 
-function! s:abspath(path, mods)
+function! s:abspath(path, mods) abort
   return a:path !=# '' ? fnamemodify(a:path, a:mods) : ''
 endfunction
 
-function! s:vcs_git.root(base) 
+function! s:vcs_git.root(base) abort
   let dir = s:abspath(finddir('.git', a:base . ';'), ':p:h:h')
   let file = s:abspath(findfile('.git', a:base . ';'), ':p:h')
   return len(dir) >= len(file) ? dir : file
 endfunction
 
-function! s:vcs_git.branch(path) 
+function! s:vcs_git.branch(path) abort
   let dotgit = a:path . '/.git'
   if filereadable(dotgit)
     let line = readfile(dotgit)[0]
@@ -41,7 +41,7 @@ function! s:vcs_git.branch(path)
   return ''
 endfunction
 
-function! s:vcs_git.status(path) 
+function! s:vcs_git.status(path) abort
   execute 'lcd' a:path
   let output = vcs_info#execute([
         \   ['git', 'status', '--short'],
@@ -50,7 +50,7 @@ function! s:vcs_git.status(path)
   return output
 endfunction
 
-function! vcs_info#git#load()
+function! vcs_info#git#load() abort
   return copy(s:vcs_git)
 endfunction
 

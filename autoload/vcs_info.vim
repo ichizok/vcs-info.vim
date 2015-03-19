@@ -7,7 +7,7 @@ set cpo&vim
 
 let s:vcs = {}
 
-function! s:load_vcs_info(this_file)
+function! s:load_vcs_info(this_file) abort
   for name in map(split(glob(a:this_file . '/*.vim'),
         \ "\n"), 'fnamemodify(v:val, ":t:r")')
     let s:vcs[name] = vcs_info#{name}#load()
@@ -21,14 +21,14 @@ endfunction
 
 call s:load_vcs_info(expand('<sfile>:p:r'))
 
-function! vcs_info#find_root()
+function! vcs_info#find_root() abort
   let vcs_info_cache = s:get_vcs_info()
   return !empty(vcs_info_cache)
         \ ? [vcs_info_cache.name, vcs_info_cache.root]
         \ : ['', '']
 endfunction
 
-function! vcs_info#get_branch()
+function! vcs_info#get_branch() abort
   let vcs_info_cache = s:get_vcs_info()
   if empty(vcs_info_cache)
     return ['', '']
@@ -38,7 +38,7 @@ function! vcs_info#get_branch()
   return [name, s:get_vcs_branch(name, root)]
 endfunction
 
-function! vcs_info#get_status()
+function! vcs_info#get_status() abort
   let vcs_info_cache = s:get_vcs_info()
   if empty(vcs_info_cache)
     return ['', '', '']
@@ -48,25 +48,29 @@ function! vcs_info#get_status()
   return [name, s:get_vcs_branch(name, root), s:get_vcs_status(name, root)]
 endfunction
 
-function! vcs_info#clear_cache()
+function! vcs_info#clear_cache() abort
   if exists('b:vcs_info_cache')
     unlet b:vcs_info_cache
   endif
 endfunction
 
-function! s:detect_vcs(base)
+function! s:detect_vcs(base) abort
   let info = {}
   for name in keys(s:vcs)
     if s:vcs[name].exists
-      let root = s:vcs[name].root(a:base)
-      let info[len(root)] = [name, root]
+      try
+        let root = s:vcs[name].root(a:base)
+        let info[len(root)] = [name, root]
+      catch
+        " nop
+      endtry
     endif
   endfor
   let info[0] = ['', '']
   return info[max(keys(info))]
 endfunction
 
-function! s:get_vcs_info()
+function! s:get_vcs_info() abort
   if exists('b:vcs_info_cache') && type(b:vcs_info_cache) == type({})
     return b:vcs_info_cache
   endif
@@ -81,33 +85,41 @@ function! s:get_vcs_info()
   return vcs_info_cache
 endfunction
 
-function! s:get_vcs_branch(name, root)
+function! s:get_vcs_branch(name, root) abort
   if exists('b:vcs_info_cache.branch')
     return b:vcs_info_cache.branch
   endif
-  let branch = s:vcs[a:name].branch(a:root)
+  try
+    let branch = s:vcs[a:name].branch(a:root)
+  catch
+    let branch = ''
+  endtry
   let b:vcs_info_cache.branch = branch
   return branch
 endfunction
 
-function! s:get_vcs_status(name, root)
+function! s:get_vcs_status(name, root) abort
   if exists('b:vcs_info_cache.status')
     return b:vcs_info_cache.status
   endif
-  let status = s:vcs[a:name].status(a:root)
+  try
+    let status = s:vcs[a:name].status(a:root)
+  catch
+    let status = ''
+  endtry
   let b:vcs_info_cache.status = status
   return status
 endfunction
 
-function! s:check_vimproc()
+function! s:check_vimproc() abort
   try
     call vimproc#version()
-    function! s:execute(cmd)
+    function! s:execute(cmd) abort
       let result = vimproc#system(a:cmd)
       return vimproc#get_last_status() == 0 ? result : ''
     endfunction
   catch
-    function! s:execute(cmd)
+    function! s:execute(cmd) abort
       let result = system(join(map(copy(a:cmd), 'escape(v:val, " ")'), ' '))
       return v:shell_error == 0 ? result : ''
     endfunction
@@ -116,7 +128,7 @@ endfunction
 
 call s:check_vimproc()
 
-function! vcs_info#execute(cmds)
+function! vcs_info#execute(cmds) abort
   for cmd in a:cmds
     let result = substitute(s:execute(cmd), '[\r\n]\+$', '', '')
     if result !=# ''
