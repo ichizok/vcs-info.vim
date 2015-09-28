@@ -7,6 +7,10 @@ set cpo&vim
 
 let s:vcs_git = {}
 
+let s:vcs_git_version = matchstr(vcs_info#execute([
+      \   ['git', 'version'],
+      \ ]) , '\d\+\(\.\d\+\)\+')
+
 function! s:abspath(path, mods) abort
   return a:path !=# '' ? fnamemodify(a:path, a:mods) : ''
 endfunction
@@ -39,14 +43,24 @@ function! s:vcs_git.branch(path) abort
   return ''
 endfunction
 
-function! s:vcs_git.status(path) abort
-  execute 'lcd' a:path
-  let output = vcs_info#execute([
-        \   ['git', 'status', '--short'],
-        \ ])
-  lcd -
-  return output
-endfunction
+if s:vcs_git_version >= '1.8.5'
+  function! s:vcs_git.status(path) abort
+    return vcs_info#execute([
+          \   ['git', '-C', a:path, 'status', '--short'],
+          \ ])
+  endfunction
+else
+  function! s:vcs_git.status(path) abort
+    try
+      lcd `=a:path`
+      return vcs_info#execute([
+            \   ['git', 'status', '--short'],
+            \ ])
+    finally
+      lcd -
+    endtry
+  endfunction
+endif
 
 function! vcs_info#git#load() abort
   return copy(s:vcs_git)
