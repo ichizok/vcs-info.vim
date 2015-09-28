@@ -10,7 +10,9 @@ let s:vcs = {}
 function! s:load_vcs_info(this_file) abort
   for name in map(split(glob(a:this_file . '/*.vim'),
         \ "\n"), 'fnamemodify(v:val, ":t:r")')
-    let s:vcs[name] = vcs_info#{name}#load()
+    if executable(name)
+      let s:vcs[name] = vcs_info#{name}#load()
+    endif
   endfor
 
   augroup vcs-info-cache
@@ -18,8 +20,6 @@ function! s:load_vcs_info(this_file) abort
     autocmd BufLeave * call vcs_info#clear_cache()
   augroup END
 endfunction
-
-call s:load_vcs_info(expand('<sfile>:p:r'))
 
 function! vcs_info#find_root() abort
   let vcs_info_cache = s:get_vcs_info()
@@ -57,14 +57,12 @@ endfunction
 function! s:detect_vcs(base) abort
   let info = {}
   for name in keys(s:vcs)
-    if s:vcs[name].exists
-      try
-        let root = s:vcs[name].root(a:base)
-        let info[len(root)] = [name, root]
-      catch
-        " nop
-      endtry
-    endif
+    try
+      let root = s:vcs[name].root(a:base)
+      let info[len(root)] = [name, root]
+    catch
+      " nop
+    endtry
   endfor
   let info[0] = ['', '']
   return info[max(keys(info))]
@@ -126,8 +124,6 @@ function! s:check_vimproc() abort
   endtry
 endfunction
 
-call s:check_vimproc()
-
 function! vcs_info#execute(cmds) abort
   for cmd in a:cmds
     let result = substitute(s:execute(cmd), '[\r\n]\+$', '', '')
@@ -137,6 +133,10 @@ function! vcs_info#execute(cmds) abort
   endfor
   return ''
 endfunction
+
+call s:check_vimproc()
+
+call s:load_vcs_info(expand('<sfile>:p:r'))
 
 " Restore 'cpoptions' {{{
 let &cpo = s:save_cpo

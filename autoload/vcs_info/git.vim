@@ -5,9 +5,7 @@ let s:save_cpo = &cpo
 set cpo&vim
 " }}}
 
-let s:vcs_git = {
-      \   'exists' : executable('git'),
-      \ }
+let s:vcs_git = {}
 
 function! s:abspath(path, mods) abort
   return a:path !=# '' ? fnamemodify(a:path, a:mods) : ''

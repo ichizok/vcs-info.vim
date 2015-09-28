@@ -5,9 +5,7 @@ let s:save_cpo = &cpo
 set cpo&vim
 " }}}
 
-let s:vcs_hg = {
-      \   'exists' : executable('hg'),
-      \ }
+let s:vcs_hg = {}
 
 function! s:vcs_hg.root(base) abort
   let root = finddir('.hg', a:base . ';')
