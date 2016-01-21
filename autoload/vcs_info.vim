@@ -74,7 +74,8 @@ function! s:get_vcs_info() abort
   endif
 
   let vcs_info_cache = {}
-  let [name, root] = s:detect_vcs(expand('%:p:h'))
+  let base = fnamemodify(resolve(expand('%:p')), ':h')
+  let [name, root] = s:detect_vcs(base)
   if name !=# ''
     let vcs_info_cache.name = name
     let vcs_info_cache.root = root
