@@ -105,19 +105,42 @@ function! s:get_vcs_status(name, root) abort
   return status
 endfunction
 
-function! s:check_vimproc() abort
-  try
-    call vimproc#version()
-    function! s:execute(cmd) abort
-      let result = vimproc#system(a:cmd)
-      return vimproc#get_last_status() == 0 ? result : ''
+function! s:define_execute() abort
+  if has('job')
+    let s:job = {}
+    function! s:job.callback(ch, msg) abort
+      let self.output += [a:msg]
     endfunction
-  catch
-    function! s:execute(cmd) abort
-      let result = system(join(map(copy(a:cmd), 'escape(v:val, " ")'), ' '))
-      return v:shell_error == 0 ? result : ''
+    function! s:job.close_cb(ch) abort
+      let self.closed = 1
     endfunction
-  endtry
+    function! s:execute(cmd) abort
+      let job = extend(copy(s:job), {'output': [], 'closed': 0})
+      let job.handle = job_start(a:cmd, {
+            \ 'out_mode': 'raw',
+            \ 'err_mode': 'raw',
+            \ 'callback': job.callback,
+            \ 'close_cb': job.close_cb,
+            \ })
+      while job.closed == 0 || job_status(job.handle) !=# 'dead'
+        sleep 10m
+      endwhile
+      return job_info(job.handle).exitval == 0 ? join(job.output, '') : ''
+    endfunction
+  else
+    try
+      call vimproc#version()
+      function! s:execute(cmd) abort
+        let result = vimproc#system(a:cmd)
+        return vimproc#get_last_status() == 0 ? result : ''
+      endfunction
+    catch
+      function! s:execute(cmd) abort
+        let result = system(join(map(copy(a:cmd), 'escape(v:val, " ")'), ' '))
+        return v:shell_error == 0 ? result : ''
+      endfunction
+    endtry
+  endif
 endfunction
 
 function! vcs_info#execute(cmds) abort
@@ -130,6 +153,6 @@ function! vcs_info#execute(cmds) abort
   return ''
 endfunction
 
-call s:check_vimproc()
+call s:define_execute()
 
 call s:load_vcs_info(expand('<sfile>:p:r'))
