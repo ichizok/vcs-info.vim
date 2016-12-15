@@ -1,10 +1,5 @@
 "" vcs_info
 
-" Saving 'cpoptions' {{{
-let s:save_cpo = &cpo
-set cpo&vim
-" }}}
-
 let s:vcs = {}
 
 function! s:load_vcs_info(this_file) abort
@@ -138,8 +133,3 @@ endfunction
 call s:check_vimproc()
 
 call s:load_vcs_info(expand('<sfile>:p:r'))
-
-" Restore 'cpoptions' {{{
-let &cpo = s:save_cpo
-unlet s:save_cpo
-" }}}

@@ -1,10 +1,5 @@
 "" vcs_info#hg
 
-" Saving 'cpoptions' {{{
-let s:save_cpo = &cpo
-set cpo&vim
-" }}}
-
 let s:vcs_hg = {}
 
 function! s:vcs_hg.root(base) abort
@@ -75,9 +70,3 @@ endif
 function! vcs_info#hg#load() abort
   return copy(s:vcs_hg)
 endfunction
-
-" Restore 'cpoptions' {{{
-let &cpo = s:save_cpo
-unlet s:save_cpo
-" }}}
-

@@ -1,10 +1,5 @@
 "" vcs_info#git
 
-" Saving 'cpoptions' {{{
-let s:save_cpo = &cpo
-set cpo&vim
-" }}}
-
 let s:vcs_git = {}
 
 let s:vcs_git_version = matchstr(vcs_info#execute([
@@ -65,8 +60,3 @@ endif
 function! vcs_info#git#load() abort
   return copy(s:vcs_git)
 endfunction
-
-" Restore 'cpoptions' {{{
-let &cpo = s:save_cpo
-unlet s:save_cpo
-" }}}
