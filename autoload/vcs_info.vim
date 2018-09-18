@@ -129,7 +129,12 @@ function! s:define_execute() abort
     endfunction
   else
     function! s:execute(cmd) abort
-      let result = system(join(map(copy(a:cmd), 'escape(v:val, " ")'), ' '))
+      if type(a:cmd) == type([])
+        let cmd = join(map(copy(a:cmd), 'escape(v:val, " ")'), ' ')
+      else
+        let cmd = a:cmd
+      endif
+      let result = system(cmd)
       return v:shell_error == 0 ? result : ''
     endfunction
   endif
