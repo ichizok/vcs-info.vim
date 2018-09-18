@@ -106,7 +106,7 @@ function! s:get_vcs_status(name, root) abort
 endfunction
 
 function! s:define_execute() abort
-  if has('job')
+  if has('job') && !has('patch-8.1.0342')
     let s:job = {}
     function! s:job.callback(ch, msg) abort
       let self.output += [a:msg]
