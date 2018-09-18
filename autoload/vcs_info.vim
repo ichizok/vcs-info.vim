@@ -128,18 +128,10 @@ function! s:define_execute() abort
       return job_info(job.handle).exitval == 0 ? join(job.output, '') : ''
     endfunction
   else
-    try
-      call vimproc#version()
-      function! s:execute(cmd) abort
-        let result = vimproc#system(a:cmd)
-        return vimproc#get_last_status() == 0 ? result : ''
-      endfunction
-    catch
-      function! s:execute(cmd) abort
-        let result = system(join(map(copy(a:cmd), 'escape(v:val, " ")'), ' '))
-        return v:shell_error == 0 ? result : ''
-      endfunction
-    endtry
+    function! s:execute(cmd) abort
+      let result = system(join(map(copy(a:cmd), 'escape(v:val, " ")'), ' '))
+      return v:shell_error == 0 ? result : ''
+    endfunction
   endif
 endfunction
 
