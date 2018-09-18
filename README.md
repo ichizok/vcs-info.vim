@@ -1,5 +1,5 @@
 # A tiny vcs-info plugin for Vim
 
-for [vimshell.vim](https://github.com/Shougo/vimshell.vim) prompt, [lightline.vim](https://github.com/itchyny/lightline.vim) statusline, etc.
+For [lightline.vim](https://github.com/itchyny/lightline.vim) statusline, etc.
 
-I recommend you use other more useful plugin. (e.g. [vim-gita](https://github.com/lambdalisue/vim-gita))
+I recommend you use other more useful plugin. (e.g. [gina.vim](https://github.com/lambdalisue/gina.vim))
